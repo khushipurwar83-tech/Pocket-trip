@@ -41,79 +41,150 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-    loadState();
     setupNavigation();
-    
-    if (AppState.isLoggedIn) {
-        showScreen('home');
-        updateDashboard();
-    } else {
+    initFirebaseAuth();
+}
+
+function initFirebaseAuth() {
+    if (!window.firebaseAuth) {
+        console.warn('Firebase Auth is not available');
+        showScreen('login');
+        return;
+    }
+
+    firebaseAuth.onAuthStateChanged((user) => {
+        if (user) {
+            AppState.isLoggedIn = true;
+            setAppUser(user);
+            loadStateForUser(user.uid);
+            updateProfileUI();
+            const errorEl = document.getElementById('loginError');
+            if (errorEl) {
+                errorEl.classList.add('hidden');
+            }
+            showScreen('home');
+            updateDashboard();
+        } else {
+            AppState.isLoggedIn = false;
+            AppState.user = null;
+            showScreen('login');
+        }
+    });
+}
+
+function setAppUser(user) {
+    AppState.user = {
+        uid: user.uid,
+        email: user.email || '',
+        name: user.displayName || (user.email ? user.email.split('@')[0] : 'Dreamer'),
+        photoURL: user.photoURL || ''
+    };
+}
+
+function getStorageKey(uid) {
+    return uid ? `wanderlog_state_${uid}` : 'wanderlog_state';
+}
+
+function loadStateForUser(uid) {
+    const key = getStorageKey(uid);
+    const saved = window.loadState(key) || window.loadState('wanderlog_state');
+    if (saved) {
+        Object.assign(AppState, saved);
+    }
+}
+
+function showAuthError(message) {
+    const errorEl = document.getElementById('loginError');
+    if (!errorEl) return;
+    if (!message) {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+        errorEl.classList.remove('visible');
+        return;
+    }
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+    errorEl.classList.add('visible');
+}
+
+window.handleLogin = async function() {
+    const loader = document.getElementById('global-loader');
+    const email = document.getElementById('loginEmail')?.value.trim();
+    const password = document.getElementById('loginPassword')?.value.trim();
+
+    if (!email || !password) {
+        showAuthError('Please enter both email and password.');
+        return;
+    }
+
+    if (loader) loader.classList.remove('hidden');
+    showAuthError('');
+
+    try {
+        await firebaseAuth.signInWithEmailAndPassword(email, password);
+    } catch (error) {
+        showAuthError(error.message || 'Unable to sign in.');
+    } finally {
+        if (loader) loader.classList.add('hidden');
+    }
+};
+
+window.handleSignUp = async function() {
+    const loader = document.getElementById('global-loader');
+    const email = document.getElementById('loginEmail')?.value.trim();
+    const password = document.getElementById('loginPassword')?.value.trim();
+
+    if (!email || !password) {
+        showAuthError('Please enter email and password to create an account.');
+        return;
+    }
+
+    if (loader) loader.classList.remove('hidden');
+    showAuthError('');
+
+    try {
+        await firebaseAuth.createUserWithEmailAndPassword(email, password);
+    } catch (error) {
+        showAuthError(error.message || 'Unable to create account.');
+    } finally {
+        if (loader) loader.classList.add('hidden');
+    }
+};
+
+window.handleGoogleLogin = async function() {
+    const loader = document.getElementById('global-loader');
+    if (loader) loader.classList.remove('hidden');
+    showAuthError('');
+
+    try {
+        await firebaseAuth.signInWithPopup(window.firebaseGoogleProvider);
+    } catch (error) {
+        showAuthError(error.message || 'Unable to sign in with Google.');
+    } finally {
+        if (loader) loader.classList.add('hidden');
+    }
+};
+
+window.logoutUser = async function() {
+    if (!window.firebaseAuth) return;
+    try {
+        await firebaseAuth.signOut();
+    } finally {
+        AppState.isLoggedIn = false;
+        AppState.user = null;
         showScreen('login');
     }
-}
+};
 
-// --- Navigation ---
-function setupNavigation() {
-    window.navigate = showScreen;
-}
-
-function showScreen(screenId) {
-    // Hide all screens
-    document.querySelectorAll('.screen').forEach(el => {
-        el.classList.remove('active');
-        el.classList.add('hidden');
-    });
-    
-    // Handle bottom nav visibility
-    const nav = document.getElementById('bottom-nav');
-    if (screenId === 'login' || screenId === 'onboarding') {
-        if(nav) nav.classList.add('hidden');
-    } else {
-        if(nav) nav.classList.remove('hidden');
+function updateProfileUI() {
+    const nameEl = document.getElementById('profileName');
+    const emailEl = document.getElementById('profileEmail');
+    const avatarEl = document.getElementById('profileAvatar');
+    if (AppState.user) {
+        if (nameEl) nameEl.innerText = AppState.user.name || 'Dreamer';
+        if (emailEl) emailEl.innerText = AppState.user.email || 'Welcome aboard';
+        if (avatarEl) avatarEl.innerText = AppState.user.name ? AppState.user.name.charAt(0).toUpperCase() : 'W';
     }
-
-    const target = document.getElementById(screenId);
-    if(target) {
-        target.classList.remove('hidden');
-        target.classList.add('active');
-    }
-    
-    // Update active nav item
-    if (nav && !nav.classList.contains('hidden')) {
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        const navMap = { 'home': 0, 'discover': 1, 'screen-map': 2, 'budget': 3, 'profile': 4 };
-        const index = navMap[screenId];
-        if (index !== undefined) {
-            document.querySelectorAll('.nav-item')[index].classList.add('active');
-        }
-    }
-
-    // Screen specific logic
-    if (screenId === 'screen-map' && window.initMap) {
-        setTimeout(() => window.initMap(), 100);
-    } else if (screenId === 'budget' && typeof window.initChart === 'function') {
-        setTimeout(() => window.initChart(), 50);
-    } else if (screenId === 'discover') {
-        window.loadDestinations();
-    } else if (screenId === 'home') {
-        updateDashboard();
-    } else if (screenId === 'active-trip') {
-        renderActiveTripPage();
-    }
-}
-
-// --- Auth ---
-window.handleLogin = function() {
-    const loader = document.getElementById('global-loader');
-    if(loader) loader.classList.remove('hidden');
-    
-    setTimeout(() => {
-        AppState.isLoggedIn = true;
-        AppState.user = { name: 'Alex' };
-        saveState();
-        if(loader) loader.classList.add('hidden');
-        showScreen('home');
-    }, 1500);
 };
 
 // --- Core Actions ---
@@ -322,19 +393,20 @@ window.searchFlights = async function () {
 
 // --- Persistence Bridge ---
 function saveState() {
-    window.saveState(AppState);
+    const key = getStorageKey(AppState.user?.uid);
+    window.saveState(AppState, key);
 }
 
 function loadState() {
-    const saved = window.loadState();
+    if (!AppState.user?.uid) return;
+    const key = getStorageKey(AppState.user.uid);
+    const saved = window.loadState(key) || window.loadState('wanderlog_state');
     if (saved) {
         Object.assign(AppState, saved);
     }
 }
 
 window.clearCache = function() {
-    if(confirm('Delete your dream board?')) {
-        localStorage.removeItem('wanderlog_state');
-        location.reload();
-    }
+    const key = getStorageKey(AppState.user?.uid);
+    window.clearState(key);
 };

@@ -123,13 +123,20 @@ window.loadDestinations = async function () {
 
     grid.innerHTML = '';
     trips.forEach(trip => {
-        const isLive = Boolean(trip.livePrice);
+        const isLive    = Boolean(trip.livePrice);
+        const weather   = trip.weather;
+        const weatherBadge = weather
+            ? `<span style="font-size:10px;background:var(--dream-sky);padding:2px 8px;border-radius:8px;font-weight:700;">${weather.temp_c}°C ${weather.is_day ? '☀️' : '🌙'}</span>`
+            : '';
+
         const pin = document.createElement('div');
         pin.className = 'pin';
         pin.onclick = () => window.openPlanner(trip.name);
 
         pin.innerHTML = `
-            <div class="pin-image" style="background-image: url('${trip.image}')"></div>
+            <div class="pin-image" style="background-image: url('${trip.image}')">
+                ${weatherBadge ? `<div style="position:absolute;top:12px;right:12px;">${weatherBadge}</div>` : ''}
+            </div>
             <div class="pin-info">
                 <p class="caption" style="color: var(--primary);">${trip.category.toUpperCase()}</p>
                 <h4 class="pin-title">${trip.name}</h4>

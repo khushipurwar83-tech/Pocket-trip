@@ -28,14 +28,17 @@
                     <p>Your dream travel planner</p>
                 </div>
                 
+                <div id="loginError" class="login-error hidden"></div>
                 <div class="login-form">
                     <input type="email" placeholder="Email" id="loginEmail">
                     <input type="password" placeholder="Password" id="loginPassword">
-                    <button id="loginBtn" onclick="handleLogin()">Start Dreaming →</button>
+                    <button id="loginBtn" onclick="handleLogin()">Continue with Email</button>
+                    <button type="button" class="btn btn-google" onclick="handleGoogleLogin()">Continue with Google</button>
+                    <button type="button" class="btn btn-outline" onclick="handleSignUp()">Create account</button>
                 </div>
                 
                 <div class="demo-hint">
-                    <p>✨ Demo: any email/password works</p>
+                    <p>✨ Use Email/Password or Google Sign-In to unlock your dream board.</p>
                 </div>
             </div>
         </div>
@@ -182,12 +185,15 @@
                 <h2 class="headline-large">Profile</h2>
             </header>
             
-            <div class="card" style="display: flex; align-items: center; gap: 24px; background: white;">
-                <div style="width: 80px; height: 80px; border-radius: 40px; background: var(--primary-glow); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--primary-warm);">AL</div>
-                <div>
-                    <h3 class="headline-small">Alex Wanderer</h3>
-                    <p class="body-text">Dreamer since 2024</p>
+            <div class="card profile-card">
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <div id="profileAvatar" style="width: 80px; height: 80px; border-radius: 40px; background: var(--primary-glow); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--primary-warm);">AL</div>
+                    <div>
+                        <h3 class="headline-small" id="profileName">Alex Wanderer</h3>
+                        <p class="body-text" id="profileEmail">Dreamer since 2024</p>
+                    </div>
                 </div>
+                <button class="btn btn-outline logout-button" onclick="logoutUser()">Logout</button>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0;">
@@ -346,6 +352,24 @@
     <script src="{{ url_for('static', filename='js/storage.js') }}"></script>
     <script src="{{ url_for('static', filename='js/destinations.js') }}"></script>
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVsvxCETT0F0mmh3R7ZpK0xOF_56c5HNA",
+            authDomain: "wanderwall-2852f.firebaseapp.com",
+            projectId: "wanderwall-2852f",
+            storageBucket: "wanderwall-2852f.firebasestorage.app",
+            messagingSenderId: "339028138342",
+            appId: "1:339028138342:web:6e0d26207fdf7e5e35d0a7",
+            measurementId: "G-WG1WNGPG2Q"
+        };
+        firebase.initializeApp(firebaseConfig);
+        window.firebaseAuth = firebase.auth();
+        window.firebaseGoogleProvider = new firebase.auth.GoogleAuthProvider();
+    </script>
+
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

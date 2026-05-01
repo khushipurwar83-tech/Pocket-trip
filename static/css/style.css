@@ -197,6 +197,57 @@ body {
 .btn-link { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
 .btn-link:hover { opacity: 0.7; }
 
+.btn-outline {
+    background: transparent;
+    border: 1px solid rgba(0,0,0,0.08);
+    color: var(--text-dark);
+}
+.btn-outline:hover {
+    background: rgba(255,255,255,0.9);
+}
+
+.btn-google {
+    background: white;
+    color: var(--text-dark);
+    border: 1px solid var(--dream-blush);
+}
+.btn-google:hover {
+    background: var(--dream-cream);
+    transform: translateY(-1px);
+}
+
+.login-error {
+    display: none;
+    background: rgba(255, 93, 93, 0.12);
+    color: var(--error-soft);
+    border: 1px solid rgba(255, 93, 93, 0.28);
+    padding: 14px 16px;
+    border-radius: 18px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+.login-error.visible {
+    display: block;
+}
+
+.profile-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+}
+
+.logout-button {
+    background: transparent;
+    border: 1px solid var(--error-soft);
+    color: var(--error-soft);
+    width: 120px;
+}
+.logout-button:hover {
+    background: rgba(255, 83, 83, 0.08);
+}
+
 /* Active Trip Page - Dream Mode */
 .trip-header-dream {
     padding: 24px 20px;

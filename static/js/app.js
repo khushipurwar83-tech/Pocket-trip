@@ -270,6 +270,56 @@ window.showMapPage = function() {
     navigate('screen-map');
 };
 
+// --- Flight Search ---
+window.searchFlights = async function () {
+    const origin  = (document.getElementById('flightOrigin')?.value || 'DEL').toUpperCase();
+    const date    = document.getElementById('flightDate')?.value || '2025-06-01';
+    const results = document.getElementById('flightResults');
+    if (!results) return;
+
+    // Derive IATA code from current trip destination
+    const destData = (window.DREAM_DESTINATIONS || []).find(d => d.name === AppState.currentTrip?.name);
+    const iata = destData?.iataCode || 'GOI';
+
+    results.innerHTML = `<div class="body-text" style="padding:20px;text-align:center;">Searching for flights ✈️ ...</div>`;
+
+    try {
+        const res  = await fetch(`/api/flights/search?origin=${origin}&destination=${iata}&date=${date}&adults=1`);
+        const data = await res.json();
+
+        if (!data.results || data.results.length === 0) {
+            results.innerHTML = `<p class="body-text" style="text-align:center;padding:20px;">No flights found for this route.</p>`;
+            return;
+        }
+
+        const badge = data.live
+            ? `<span style="font-size:9px;color:var(--dream-sage);font-weight:700;"> ✈ LIVE PRICES</span>`
+            : `<span style="font-size:9px;color:var(--text-light);font-weight:700;"> (Sample prices)</span>`;
+
+        results.innerHTML = data.results.map(f => `
+            <div class="card" style="background:white;padding:16px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <p class="headline-small" style="font-size:20px;color:var(--primary);">
+                            ₹${parseFloat(f.price).toLocaleString()} ${badge}
+                        </p>
+                        ${(f.segments || []).map(s => `
+                            <p class="body-text" style="font-size:12px;margin-top:4px;">
+                                ${s.departure} → ${s.arrival} &nbsp;|&nbsp; ${s.departureAt?.slice(11,16) || '--'} – ${s.arrivalAt?.slice(11,16) || '--'}
+                                ${s.carrier ? `&nbsp;|&nbsp; ${s.carrier}` : ''}
+                            </p>
+                        `).join('')}
+                    </div>
+                    <button class="btn btn-primary" style="padding:10px 16px;font-size:12px;">Book</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        results.innerHTML = `<p class="body-text" style="color:var(--dream-rose);text-align:center;">Couldn't fetch flights. Try again.</p>`;
+        console.error('[wanderlog] Flight search error:', err);
+    }
+};
+
 // --- Persistence Bridge ---
 function saveState() {
     window.saveState(AppState);

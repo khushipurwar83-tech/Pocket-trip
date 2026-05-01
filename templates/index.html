@@ -257,6 +257,19 @@
                 
                 <!-- End Trip Button -->
                 <button class="end-trip-dream" onclick="endCurrentTrip()">📦 End Trip & Save to Past Journeys</button>
+
+                <!-- ✈ Live Flight Search -->
+                <div class="itinerary-dream" style="margin-top: 24px;">
+                    <h2>✈️ Find Flights</h2>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+                        <input id="flightOrigin" type="text" placeholder="From (e.g. DEL)" maxlength="3"
+                               style="flex:1;min-width:100px;background:white;border:1px solid var(--dream-blush);padding:12px 16px;border-radius:14px;font-family:inherit;text-transform:uppercase;">
+                        <input id="flightDate" type="date"
+                               style="flex:1;min-width:140px;background:white;border:1px solid var(--dream-blush);padding:12px 16px;border-radius:14px;font-family:inherit;">
+                        <button class="btn btn-primary" style="padding:12px 24px;" onclick="searchFlights()">Search ✈</button>
+                    </div>
+                    <div id="flightResults"></div>
+                </div>
             </div>
         </section>
     </main>

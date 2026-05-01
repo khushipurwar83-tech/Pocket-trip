@@ -6,5 +6,4 @@ env/
 .vscode/
 .idea/
 .DS_Store
-static/js/storage.js
 node_modules/

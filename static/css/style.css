@@ -1,0 +1,463 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+
+:root {
+    /* wanderlog - The Dream Palette */
+    --dream-cream: #FFFDF7;
+    --dream-sand: #F5E6D3;
+    --dream-blush: #F3D7CA;
+    --dream-gold: #E8C4A0;
+    --dream-sage: #9CAF88;
+    --dream-sky: #A8C4D4;
+    --dream-navy: #2F3E46;
+    --dream-rose: #DDBEA9;
+    
+    --text-dark: #2C3E50;
+    --text-soft: #5A6E7A;
+    --text-light: #8DA1B5;
+    
+    --card-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+    --hover-shadow: 0 25px 40px -12px rgba(0,0,0,0.15);
+
+    /* Functional Mapping */
+    --bg-main: var(--dream-cream);
+    --bg-card: var(--dream-sand);
+    --primary: var(--dream-gold);
+    --accent: var(--dream-sage);
+}
+
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Typography */
+.headline-large {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-dark);
+}
+
+.headline-small {
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.body-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-soft);
+}
+
+.caption {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+}
+
+/* --- Layout --- */
+#app {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    min-height: 100vh;
+}
+
+.screen { 
+    display: none; 
+    padding: 32px 24px; 
+    padding-bottom: 120px; 
+}
+
+.screen.active { 
+    display: block; 
+    animation: dreamFadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes dreamFadeIn {
+    from { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* --- Login Screen --- */
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top left, var(--dream-blush) 0%, var(--dream-cream) 50%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 48px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: 32px;
+    border: 1px solid white;
+    box-shadow: var(--card-shadow);
+}
+
+.brand { margin-bottom: 40px; }
+.brand-icon { font-size: 40px; margin-bottom: 16px; }
+.brand h1 { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; }
+.brand h1 span { color: var(--primary); font-style: italic; }
+.brand p { color: var(--text-soft); font-size: 14px; margin-top: 8px; }
+
+.login-form { display: flex; flex-direction: column; gap: 16px; }
+.login-form input {
+    background: white;
+    border: 1px solid var(--dream-blush);
+    padding: 16px 20px;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+.login-form input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px var(--dream-blush); }
+
+#loginBtn {
+    background: var(--text-dark);
+    color: white;
+    padding: 18px;
+    border-radius: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+#loginBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+/* --- Pinterest Board Styles --- */
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    padding-top: 24px;
+}
+
+.pin {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.pin:hover { transform: scale(1.02) translateY(-5px); box-shadow: var(--hover-shadow); }
+
+.pin-image {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    background-size: cover;
+    background-position: center;
+}
+
+.pin-info { padding: 16px; }
+.pin-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.pin-meta { display: flex; justify-content: space-between; align-items: center; }
+
+/* Dashboard & Sections */
+.user-greeting { margin-bottom: 32px; text-align: left; }
+.user-greeting h1 { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+.user-greeting p { color: var(--text-soft); font-size: 15px; }
+
+.header-stats { display: flex; gap: 24px; margin-bottom: 40px; }
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat-value { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--primary); }
+.stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); }
+
+.section { margin-bottom: 48px; }
+.section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; }
+.section-header h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
+
+.btn-link { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+.btn-link:hover { opacity: 0.7; }
+
+/* Active Trip Page - Dream Mode */
+.trip-header-dream {
+    padding: 24px 20px;
+    background: var(--bg-main);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.trip-title-dream {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.trip-hero-dream {
+    height: 240px;
+    margin: 0 20px 24px;
+    border-radius: 32px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.trip-hero-dream::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, rgba(44, 62, 80, 0.6));
+}
+
+.trip-stats-dream {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0 20px;
+    margin-bottom: 32px;
+}
+
+.stat-dream {
+    background: white;
+    padding: 16px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid var(--dream-blush);
+    text-align: center;
+}
+
+.stat-dream span {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-light);
+}
+
+.stat-dream strong {
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+.active-trip-card {
+    background: var(--dream-sand);
+    border-radius: 28px;
+    padding: 32px;
+    border: 1px solid var(--dream-blush);
+    box-shadow: var(--card-shadow);
+}
+
+.dream-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.explore-cta {
+    background: linear-gradient(135deg, var(--dream-blush) 0%, var(--dream-sand) 100%);
+    border-radius: 32px;
+    padding: 48px 32px;
+    text-align: center;
+    border: 1px solid var(--dream-blush);
+}
+
+.cta-content h3 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 12px; }
+.cta-content p { color: var(--text-soft); margin-bottom: 24px; font-size: 15px; }
+
+/* --- Components Re-styling --- */
+.card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid white;
+    box-shadow: var(--card-shadow);
+}
+
+.btn {
+    border-radius: 14px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+    cursor: pointer;
+}
+
+.btn-primary { background: var(--primary); color: white; border: none; }
+.btn-primary:hover { background: var(--dream-rose); transform: translateY(-1px); }
+
+.bottom-nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    padding: 12px 24px;
+    display: flex;
+    gap: 32px;
+    z-index: 1000;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.nav-item svg { width: 24px; height: 24px; }
+.nav-item.active { color: var(--primary); }
+
+.progress-container {
+    height: 10px;
+    background: var(--dream-blush);
+    border-radius: 20px;
+}
+.progress-bar {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 20px;
+}
+
+/* Utilities */
+.hidden { display: none !important; }
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 62, 80, 0.4);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+}
+
+.modal:not(.hidden) { display: flex; }
+
+.modal-content {
+    background: var(--bg-main);
+    border-radius: 32px;
+    padding: 40px;
+}
+
+/* Dream Pins on Map */
+.dream-pin-marker { background: none; border: none; }
+
+.pin-card {
+    width: 180px;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    border: 1px solid white;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pin-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: var(--hover-shadow);
+}
+
+.pin-image {
+    width: 100%;
+    height: 120px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.pin-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(44, 62, 80, 0.4));
+}
+
+.pin-price {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.pin-info { padding: 12px; }
+.pin-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+.pin-location { font-size: 11px; color: var(--text-soft); margin-bottom: 8px; }
+.pin-vibe { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--text-light); background: var(--dream-sand); padding: 2px 8px; border-radius: 8px; }
+
+/* Global Loader */
+.loader-wrapper {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    z-index: 5000;
+    background: var(--dream-cream);
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--dream-blush);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: dreamSpin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes dreamSpin {
+    to { transform: rotate(360deg); }
+}
+
+.dream-map-container {
+    height: calc(100vh - 180px);
+    margin: 20px;
+    border-radius: 32px;
+    overflow: hidden;
+    border: 1px solid var(--dream-blush);
+    box-shadow: var(--card-shadow);
+}

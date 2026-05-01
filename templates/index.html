@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>wanderlog | dream it, plan it</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Leaflet Mapping Library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Professional Loader -->
+    <div id="global-loader" class="hidden loader-wrapper" style="background: var(--brand-cream);">
+        <div class="spinner" style="border-top-color: var(--primary-warm);"></div>
+        <p class="caption">Curating your dream board...</p>
+    </div>
+
+    <!-- SCREEN 0: LOGIN -->
+    <section id="login" class="screen active" style="padding:0;">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="brand">
+                    <div class="brand-icon">🗺️✨</div>
+                    <h1>wander<span>log</span></h1>
+                    <p>Your dream travel planner</p>
+                </div>
+                
+                <div class="login-form">
+                    <input type="email" placeholder="Email" id="loginEmail">
+                    <input type="password" placeholder="Password" id="loginPassword">
+                    <button id="loginBtn" onclick="handleLogin()">Start Dreaming →</button>
+                </div>
+                
+                <div class="demo-hint">
+                    <p>✨ Demo: any email/password works</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main id="app">
+        <!-- SCREEN 1: DASHBOARD (DREAM BOARD) -->
+        <section id="home" class="screen hidden">
+            <div class="dashboard">
+                <!-- Header with user greeting -->
+                <div class="dashboard-header">
+                    <div class="user-greeting">
+                        <h1>Hello, <span id="userName">Dreamer</span> ✨</h1>
+                        <p>Your next adventure is calling</p>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat">
+                            <span class="stat-value" id="tripCount">0</span>
+                            <span class="stat-label">Trips taken</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="savedCount">0</span>
+                            <span class="stat-label">Saved dreams</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Current Active Trip Section -->
+                <div class="section" id="activeTripSection" style="display: none;">
+                    <div class="section-header">
+                        <h2>🌟 Current Adventure</h2>
+                        <button class="btn-link" onclick="navigate('home')">Continue Planning →</button>
+                    </div>
+                    <div class="active-trip-card" id="activeTripCard">
+                        <!-- Active trip content injected via JS -->
+                    </div>
+                </div>
+                
+                <!-- Saved Destinations (Pinterest-style grid) -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>📌 Saved Dreams</h2>
+                        <button class="btn-link" onclick="navigate('discover')">Discover More →</button>
+                    </div>
+                    <div class="dream-grid" id="savedGrid">
+                        <!-- Pinterest-style cards of saved destinations -->
+                    </div>
+                </div>
+                
+                <!-- Past Trips -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>📖 Past Journeys</h2>
+                    </div>
+                    <div class="past-trips-list" id="pastTripsList">
+                        <div class="body-text" style="text-align: center; padding: 40px; background: var(--brand-sand); border-radius: 20px;">No past journeys yet. Start exploring!</div>
+                    </div>
+                </div>
+                
+                <!-- Explore CTA -->
+                <div class="explore-cta">
+                    <div class="cta-content">
+                        <h3>🌍 Find your next adventure</h3>
+                        <p>Explore destinations and pin your dreams</p>
+                        <button class="btn btn-primary" onclick="navigate('discover')">
+                            Explore Dream Map →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: EXPLORE (PINTEREST BOARD) -->
+        <section id="discover" class="screen hidden">
+            <header style="margin-bottom: 40px; text-align: center;">
+                <p class="caption">EXPLORE THE WORLD</p>
+                <h2 class="headline-large">Pin Your Dreams</h2>
+            </header>
+            
+            <div class="board-grid" id="trip-grid">
+                <!-- Pinterest pins injected via JS -->
+            </div>
+        </section>
+
+        <!-- SCREEN 3: BUDGET ANALYSIS -->
+        <section id="budget" class="screen hidden">
+            <header style="margin-bottom: 40px; text-align: center;">
+                <p class="caption">INSIGHTS</p>
+                <h2 class="headline-large">Budget Harmony</h2>
+            </header>
+            
+            <div class="card chart-container" style="background: white; border: none; margin-bottom: 32px;">
+                <canvas id="budgetChart"></canvas>
+            </div>
+            
+            <div class="card">
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <p class="body-text">Stay</p>
+                        <p class="caption" id="val-stay">40%</p>
+                    </div>
+                    <input type="range" id="sl-stay" min="0" max="100" value="40" oninput="updateChart()">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <p class="body-text">Dining</p>
+                        <p class="caption" id="val-food">25%</p>
+                    </div>
+                    <input type="range" id="sl-food" min="0" max="100" value="25" oninput="updateChart()">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <p class="body-text">Transport</p>
+                        <p class="caption" id="val-travel">25%</p>
+                    </div>
+                    <input type="range" id="sl-travel" min="0" max="100" value="25" oninput="updateChart()">
+                </div>
+                <button class="btn btn-primary w-100 mt-4" onclick="saveBudgetPlan()">Update My Dream Plan</button>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: MAP (DREAM DESTINATION BOARD) -->
+        <section id="screen-map" class="screen hidden" style="padding: 0;">
+            <div class="map-page">
+                <div class="map-header">
+                    <button class="back-btn" onclick="navigate('home')">← Dashboard</button>
+                    <h2>🌍 Dream Destination Board</h2>
+                    <div class="map-filters">
+                        <button class="filter-chip active">All</button>
+                        <button class="filter-chip">🏔️ Mountains</button>
+                        <button class="filter-chip">🏖️ Beaches</button>
+                        <button class="filter-chip">🏰 Heritage</button>
+                        <button class="filter-chip">🧘 Spiritual</button>
+                    </div>
+                </div>
+                <div id="dreamMap" class="dream-map-container"></div>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: PROFILE -->
+        <section id="profile" class="screen hidden">
+            <header style="margin-bottom: 40px; text-align: center;">
+                <p class="caption">MY VOYAGE</p>
+                <h2 class="headline-large">Profile</h2>
+            </header>
+            
+            <div class="card" style="display: flex; align-items: center; gap: 24px; background: white;">
+                <div style="width: 80px; height: 80px; border-radius: 40px; background: var(--primary-glow); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--primary-warm);">AL</div>
+                <div>
+                    <h3 class="headline-small">Alex Wanderer</h3>
+                    <p class="body-text">Dreamer since 2024</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0;">
+                <div class="card" style="text-align: center; padding: 16px;">
+                    <p class="headline-small" style="font-size: 20px;">₹45K</p>
+                    <p class="caption" style="font-size: 9px;">SAVED</p>
+                </div>
+                <div class="card" style="text-align: center; padding: 16px;">
+                    <p class="headline-small" style="font-size: 20px;">12</p>
+                    <p class="caption" style="font-size: 9px;">PINS</p>
+                </div>
+                <div class="card" style="text-align: center; padding: 16px;">
+                    <p class="headline-small" style="font-size: 20px;">8</p>
+                    <p class="caption" style="font-size: 9px;">TRIPS</p>
+                </div>
+            </div>
+            
+            <button class="btn btn-outline w-100" onclick="clearCache()" style="color: var(--error-soft); border-color: var(--error-soft);">Delete Dream Board</button>
+        </section>
+
+        <!-- SCREEN 6: SETUP TRIP -->
+        <section id="onboarding" class="screen hidden">
+            <!-- ... onboarding content ... -->
+        </section>
+
+        <!-- SCREEN 7: ACTIVE TRIP PAGE (NEW) -->
+        <section id="active-trip" class="screen hidden" style="padding: 0;">
+            <div class="active-trip-page">
+                <div class="trip-header-dream">
+                    <button class="back-btn" onclick="navigate('home')">← Dashboard</button>
+                    <div class="trip-title-dream" id="tripTitle">Goa Exploration</div>
+                </div>
+                
+                <!-- Trip Hero -->
+                <div class="trip-hero-dream" id="tripHero"></div>
+                
+                <!-- Trip Stats -->
+                <div class="trip-stats-dream">
+                    <div class="stat-dream">
+                        <span>💰 Budget</span>
+                        <strong id="tripBudget">₹0</strong>
+                    </div>
+                    <div class="stat-dream">
+                        <span>💸 Spent</span>
+                        <strong id="tripSpent">₹0</strong>
+                    </div>
+                    <div class="stat-dream">
+                        <span>✨ Left</span>
+                        <strong id="tripRemaining">₹0</strong>
+                    </div>
+                </div>
+                
+                <!-- Daily Itinerary -->
+                <div class="itinerary-dream">
+                    <h2>📖 Your Travel Story</h2>
+                    <div id="dailyItinerary" class="daily-itinerary-dream"></div>
+                </div>
+                
+                <!-- Expense Tracker -->
+                <div class="expenses-dream">
+                    <div class="expenses-header">
+                        <h2>💰 Spending Log</h2>
+                        <button class="add-expense-dream" onclick="showAddExpenseModal()">+ Add Expense</button>
+                    </div>
+                    <div id="expensesList" class="expenses-list-dream"></div>
+                </div>
+                
+                <!-- End Trip Button -->
+                <button class="end-trip-dream" onclick="endCurrentTrip()">📦 End Trip & Save to Past Journeys</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- FLOATING BOTTOM NAVIGATION -->
+    <nav id="bottom-nav" class="bottom-nav hidden">
+        <button class="nav-item active" onclick="navigate('home')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span>Dreams</span>
+        </button>
+        <button class="nav-item" onclick="navigate('discover')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span>Explore</span>
+        </button>
+        <button class="nav-item" onclick="navigate('screen-map')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>Map</span>
+        </button>
+        <button class="nav-item" onclick="navigate('budget')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>Budget</span>
+        </button>
+        <button class="nav-item" onclick="navigate('profile')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            <span>Me</span>
+        </button>
+    </nav>
+
+    <!-- Modal Placeholder -->
+    <div id="expense-modal" class="modal hidden" style="position: fixed; inset: 0; background: rgba(61, 53, 46, 0.4); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(8px);">
+        <div class="modal-content card" style="width: 100%; max-width: 440px;">
+            <h3 class="headline-small" style="margin-bottom: 24px;">Pin Transaction</h3>
+            <input type="text" placeholder="Where did you explore?">
+            <input type="number" placeholder="Cost (INR)">
+            <select>
+                <option>Dining</option>
+                <option>Stay</option>
+                <option>Transport</option>
+                <option>Experience</option>
+            </select>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn btn-outline w-100" onclick="document.getElementById('expense-modal').classList.add('hidden')">Cancel</button>
+                <button class="btn btn-primary w-100" onclick="document.getElementById('expense-modal').classList.add('hidden')">Pin It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trip Planner Modal (From Pins) -->
+    <div id="planner-modal" class="modal hidden" style="position: fixed; inset: 0; background: rgba(61, 53, 46, 0.4); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(8px);">
+        <div class="modal-content card" style="width: 100%; max-width: 500px; text-align: center;">
+            <p class="caption">START PLANNING</p>
+            <h3 class="headline-large" id="plan-dest-name" style="margin: 16px 0;">Destination</h3>
+            <p class="body-text" style="margin-bottom: 32px;">Configure your dream journey to this location.</p>
+            
+            <div class="login-form">
+                <div style="text-align: left;">
+                    <p class="caption">TOTAL BUDGET</p>
+                    <input type="number" id="planBudget" placeholder="₹50,000" style="width: 100%;">
+                </div>
+                <div style="text-align: left; margin-top: 16px;">
+                    <p class="caption">DURATION (DAYS)</p>
+                    <input type="number" id="planDays" placeholder="5" style="width: 100%;">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 40px;">
+                <button class="btn btn-outline w-100" onclick="document.getElementById('planner-modal').classList.add('hidden')">Cancel</button>
+                <button class="btn btn-primary w-100" onclick="createTripFromPin()">Create Trip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/storage.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/destinations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

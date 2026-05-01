@@ -368,6 +368,45 @@
         firebase.initializeApp(firebaseConfig);
         window.firebaseAuth = firebase.auth();
         window.firebaseGoogleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // Add this after initialization
+        firebaseAuth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // User is signed in
+                console.log('Logged in:', user.email);
+                localStorage.setItem(`wanderlog_${user.uid}_loggedIn`, 'true');
+                // Instead of redirect, use the app's navigation system
+                if (window.AppState) {
+                    window.AppState.isLoggedIn = true;
+                    window.setAppUser(user);
+                    window.loadStateForUser(user.uid);
+                    window.updateProfileUI();
+                    window.showScreen('home');
+                    window.updateDashboard();
+                }
+            } else {
+                // User is signed out
+                console.log('Logged out');
+                if (window.AppState) {
+                    window.AppState.isLoggedIn = false;
+                    window.AppState.user = null;
+                    window.showScreen('login');
+                }
+            }
+        });
+
+        // Handle redirect result when page loads
+        firebaseAuth.getRedirectResult().then((result) => {
+            if (result && result.user) {
+                console.log('Redirect sign-in successful:', result.user.email);
+                // The onAuthStateChanged will handle the navigation
+            }
+        }).catch((error) => {
+            console.error('Redirect error:', error.message);
+            if (window.showAuthError) {
+                window.showAuthError(error.message || 'Authentication error occurred.');
+            }
+        });
     </script>
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

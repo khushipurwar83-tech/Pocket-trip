@@ -42,34 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initApp() {
     setupNavigation();
-    initFirebaseAuth();
-}
-
-function initFirebaseAuth() {
-    if (!window.firebaseAuth) {
-        console.warn('Firebase Auth is not available');
-        showScreen('login');
-        return;
-    }
-
-    firebaseAuth.onAuthStateChanged((user) => {
-        if (user) {
-            AppState.isLoggedIn = true;
-            setAppUser(user);
-            loadStateForUser(user.uid);
-            updateProfileUI();
-            const errorEl = document.getElementById('loginError');
-            if (errorEl) {
-                errorEl.classList.add('hidden');
-            }
-            showScreen('home');
-            updateDashboard();
-        } else {
-            AppState.isLoggedIn = false;
-            AppState.user = null;
-            showScreen('login');
-        }
-    });
+    // Firebase auth is now handled in the HTML initialization
 }
 
 function setAppUser(user) {
@@ -157,10 +130,9 @@ window.handleGoogleLogin = async function() {
     showAuthError('');
 
     try {
-        await firebaseAuth.signInWithPopup(window.firebaseGoogleProvider);
+        await firebaseAuth.signInWithRedirect(window.firebaseGoogleProvider);
     } catch (error) {
         showAuthError(error.message || 'Unable to sign in with Google.');
-    } finally {
         if (loader) loader.classList.add('hidden');
     }
 };

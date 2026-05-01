@@ -45,6 +45,59 @@ function initApp() {
     // Firebase auth is now handled in the HTML initialization
 }
 
+function setupNavigation() {
+    console.log("Navigation setup complete");
+    
+    // Get all nav items
+    const navItems = document.querySelectorAll('.nav-item');
+    const screens = document.querySelectorAll('.screen');
+    
+    if (navItems.length === 0) {
+        console.log("No nav items found - using alternative navigation");
+        return;
+    }
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const targetScreen = this.getAttribute('data-screen');
+            
+            // Update active states
+            navItems.forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show target screen
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+                if (screen.id === targetScreen + 'Screen') {
+                    screen.classList.add('active');
+                }
+            });
+        });
+    });
+}
+
+// Global navigate function for backward compatibility
+window.navigate = function(screenName) {
+    const navItems = document.querySelectorAll('.nav-item');
+    const screens = document.querySelectorAll('.screen');
+    
+    // Update active states
+    navItems.forEach(nav => {
+        nav.classList.remove('active');
+        if (nav.getAttribute('data-screen') === screenName) {
+            nav.classList.add('active');
+        }
+    });
+    
+    // Show target screen
+    screens.forEach(screen => {
+        screen.classList.remove('active');
+        if (screen.id === screenName + 'Screen') {
+            screen.classList.add('active');
+        }
+    });
+};
+
 function setAppUser(user) {
     AppState.user = {
         uid: user.uid,
@@ -144,7 +197,7 @@ window.logoutUser = async function() {
     } finally {
         AppState.isLoggedIn = false;
         AppState.user = null;
-        showScreen('login');
+        showScreen('loginScreen');
     }
 };
 
@@ -178,7 +231,7 @@ window.startJourney = function(budget, days) {
 
     setTimeout(() => {
         if(loader) loader.classList.add('hidden');
-        showScreen('home');
+        showScreen('homeScreen');
         updateDashboard();
     }, 1200);
 };

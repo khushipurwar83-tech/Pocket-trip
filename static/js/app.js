@@ -25,13 +25,44 @@ const AppState = {
     ]
 };
 
+function getScreenElement(screenName) {
+    if (!screenName) return null;
+    const exact = document.getElementById(screenName);
+    if (exact) return exact;
+    const suffixed = document.getElementById(screenName + 'Screen');
+    if (suffixed) return suffixed;
+    const alt = document.getElementById(screenName.replace(/Screen$/, ''));
+    if (alt) return alt;
+    return null;
+}
+
+function showScreen(screenName) {
+    const screens = document.querySelectorAll('.screen');
+    const target = getScreenElement(screenName);
+    
+    if (!target) {
+        console.warn(`[wanderlog] showScreen() could not find screen for: ${screenName}`);
+        return;
+    }
+    
+    screens.forEach(screen => screen.classList.remove('active'));
+    target.classList.add('active');
+    
+    const activeScreenName = target.id.endsWith('Screen') ? target.id.replace(/Screen$/, '') : target.id;
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.classList.toggle(item.getAttribute('data-screen') === activeScreenName);
+    });
+    
+    if (activeScreenName === 'active-trip') {
+        renderActiveTripPage();
+    }
+}
+
 function setupNavigation() {
     console.log("Navigation setup complete");
     
-    // Get all nav items
     const navItems = document.querySelectorAll('.nav-item');
-    const screens = document.querySelectorAll('.screen');
-    
     if (navItems.length === 0) {
         console.log("No nav items found - using alternative navigation");
         return;
@@ -40,18 +71,7 @@ function setupNavigation() {
     navItems.forEach(item => {
         item.addEventListener('click', function() {
             const targetScreen = this.getAttribute('data-screen');
-            
-            // Update active states
-            navItems.forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Show target screen
-            screens.forEach(screen => {
-                screen.classList.remove('active');
-                if (screen.id === targetScreen + 'Screen') {
-                    screen.classList.add('active');
-                }
-            });
+            showScreen(targetScreen);
         });
     });
 }
@@ -78,24 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Global navigate function for backward compatibility
 window.navigate = function(screenName) {
-    const navItems = document.querySelectorAll('.nav-item');
-    const screens = document.querySelectorAll('.screen');
-    
-    // Update active states
-    navItems.forEach(nav => {
-        nav.classList.remove('active');
-        if (nav.getAttribute('data-screen') === screenName) {
-            nav.classList.add('active');
-        }
-    });
-    
-    // Show target screen
-    screens.forEach(screen => {
-        screen.classList.remove('active');
-        if (screen.id === screenName + 'Screen') {
-            screen.classList.add('active');
-        }
-    });
+    showScreen(screenName);
 };
 
 function setAppUser(user) {

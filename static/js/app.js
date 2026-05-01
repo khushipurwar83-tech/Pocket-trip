@@ -25,21 +25,6 @@ const AppState = {
     ]
 };
 
-// --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
-    initApp();
-    
-    // Global delegation for onboarding setup
-    document.addEventListener('click', (e) => {
-        const durationBtn = e.target.closest('.duration-btn');
-        if(durationBtn) {
-            document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
-            durationBtn.classList.add('active');
-            AppState.setup.days = parseInt(durationBtn.getAttribute('data-days'));
-        }
-    });
-});
-
 function setupNavigation() {
     console.log("Navigation setup complete");
     
@@ -75,6 +60,21 @@ function initApp() {
     setupNavigation();
     // Firebase auth is now handled in the HTML initialization
 }
+
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+    
+    // Global delegation for onboarding setup
+    document.addEventListener('click', (e) => {
+        const durationBtn = e.target.closest('.duration-btn');
+        if(durationBtn) {
+            document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
+            durationBtn.classList.add('active');
+            AppState.setup.days = parseInt(durationBtn.getAttribute('data-days'));
+        }
+    });
+});
 
 // Global navigate function for backward compatibility
 window.navigate = function(screenName) {

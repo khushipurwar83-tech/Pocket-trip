@@ -43,21 +43,72 @@
         .btn-secondary { background: #f0f0f0; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
 
-        .back-btn { background: none; border: none; font-size: 16px; cursor: pointer; color: #4A90E2; margin-bottom: 20px; }
+        /* Auth Screen */
+        .auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; }
+        .auth-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 24px; padding: 40px; max-width: 400px; width: 90%; }
+        .auth-title { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .auth-subtitle { font-size: 16px; opacity: 0.9; margin-bottom: 32px; }
+        .auth-btn { background: white; color: #333; border: none; padding: 16px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; margin-bottom: 16px; }
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .auth-btn img { width: 24px; height: 24px; }
+
+        /* User Info */
+        .user-info { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; }
+        .logout-btn { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
     </style>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+        import { getAuth, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUMMY_KEY_FOR_DEMO",
+            authDomain: "wanderlog-demo.firebaseapp.com",
+            projectId: "wanderlog-demo",
+            storageBucket: "wanderlog-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        window.firebaseAuth = { auth, provider, signInWithRedirect, signOut, onAuthStateChanged };
+    </script>
 </head>
 <body>
 
+<!-- Auth Screen -->
+<div id="authScreen" class="screen auth-screen active">
+    <div class="auth-card">
+        <h1 class="auth-title">🌍 Wanderlog</h1>
+        <p class="auth-subtitle">Your dream travel planner awaits</p>
+        <button class="auth-btn" onclick="signInWithGoogle()">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+            Continue with Google
+        </button>
+        <p style="font-size: 12px; opacity: 0.7; margin-top: 20px;">Sign in to plan your next adventure ✨</p>
+    </div>
+</div>
+
 <!-- DASHBOARD SCREEN -->
-<div id="dashboardScreen" class="screen active">
+<div id="dashboardScreen" class="screen">
     <div class="dashboard">
         <div class="dashboard-header">
             <div>
-                <h1>Hello, Dreamer ✨</h1>
+                <h1>Hello, <span id="userName">Dreamer</span> ✨</h1>
                 <p>Your next adventure is calling</p>
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+                <span id="userEmail"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
 
@@ -126,6 +177,58 @@
 <!-- App Scripts -->
 <script src="/static/js/destinations.js"></script>
 <script>
+    // ============ DESTINATIONS DATA ============
+    const DESTINATIONS = [
+        {
+            id: "goa", name: "Goa", location: "India",
+            lat: 15.2993, lng: 74.1240,
+            image: "https://images.unsplash.com/photo-1512343879784-960f40e07e7a?w=400&h=300&fit=crop",
+            description: "Sun-kissed beaches, Portuguese heritage, and vibrant nightlife",
+            startPrice: 2999, vibe: "🌊 Beach vibes • Parties • Heritage", category: "beach"
+        },
+        {
+            id: "manali", name: "Manali", location: "Himachal Pradesh",
+            lat: 32.2396, lng: 77.1887,
+            image: "https://images.unsplash.com/photo-1584191059421-638b2f94f471?w=400&h=300&fit=crop",
+            description: "Snow-capped peaks, pine forests, and adventure sports",
+            startPrice: 2499, vibe: "🏔️ Mountains • Adventure • Cafes", category: "mountain"
+        },
+        {
+            id: "jaipur", name: "Jaipur", location: "Rajasthan",
+            lat: 26.9124, lng: 75.7873,
+            image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&h=300&fit=crop",
+            description: "The Pink City's royal heritage and majestic forts",
+            startPrice: 3499, vibe: "🏰 Palaces • Forts • Colors", category: "heritage"
+        }
+    ];
+
+    // ============ AUTHENTICATION ============
+    let currentUser = null;
+
+    function signInWithGoogle() {
+        const { auth, provider, signInWithRedirect } = window.firebaseAuth;
+        signInWithRedirect(auth, provider).catch(error => {
+            console.error('Auth error:', error);
+            alert('Authentication failed. Please try again.');
+        });
+    }
+
+    function logout() {
+        const { auth, signOut } = window.firebaseAuth;
+        signOut(auth).then(() => {
+            showScreen('auth');
+            document.getElementById('userInfo').style.display = 'none';
+        });
+    }
+
+    function updateUserUI(user) {
+        if (user) {
+            document.getElementById('userName').textContent = user.displayName || 'Traveler';
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userAvatar').src = user.photoURL || 'https://via.placeholder.com/32x32?text=U';
+            document.getElementById('userInfo').style.display = 'flex';
+        }
+    }
     // ============ GLOBAL VARIABLES ============
     let currentDestination = null;
     let map = null;
@@ -175,6 +278,11 @@
     }
 
     function saveTrip() {
+        if (!currentUser) {
+            alert('Please sign in to save trips!');
+            return;
+        }
+
         const checkboxes = document.querySelectorAll('.place-checkbox:checked');
         selectedPlaces = Array.from(checkboxes).map(cb => cb.value);
 
@@ -191,12 +299,14 @@
             days: parseInt(document.getElementById('tripDays').value),
             people: parseInt(document.getElementById('tripPeople').value),
             stay: document.getElementById('tripStay').value,
+            userId: currentUser.uid,
             date: new Date().toISOString()
         };
 
-        let savedTrips = JSON.parse(localStorage.getItem('wanderlog_trips') || '[]');
+        const userTripsKey = `wanderlog_trips_${currentUser.uid}`;
+        let savedTrips = JSON.parse(localStorage.getItem(userTripsKey) || '[]');
         savedTrips.push(trip);
-        localStorage.setItem('wanderlog_trips', JSON.stringify(savedTrips));
+        localStorage.setItem(userTripsKey, JSON.stringify(savedTrips));
 
         alert(`✅ Trip to ${currentDestination.name} saved!`);
         closeModal();
@@ -206,7 +316,10 @@
 
     // ============ LOAD SAVED TRIPS ============
     function loadSavedTrips() {
-        const savedTrips = JSON.parse(localStorage.getItem('wanderlog_trips') || '[]');
+        if (!currentUser) return;
+
+        const userTripsKey = `wanderlog_trips_${currentUser.uid}`;
+        const savedTrips = JSON.parse(localStorage.getItem(userTripsKey) || '[]');
         const container = document.getElementById('savedTripsGrid');
 
         if (savedTrips.length === 0) {
@@ -282,10 +395,26 @@
     // ============ INITIALIZE ============
     document.addEventListener('DOMContentLoaded', () => {
         console.log("🚀 Wanderlog starting...");
+
+        // Handle Firebase redirect result
+        const { auth, onAuthStateChanged } = window.firebaseAuth;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                updateUserUI(user);
+                showScreen('dashboard');
+                loadDestinations();
+                loadSavedTrips();
+                initMap();
+                console.log("✅ User logged in:", user.displayName);
+            } else {
+                currentUser = null;
+                showScreen('auth');
+                console.log("👤 User not logged in");
+            }
+        });
+
         setupNavigation();
-        loadDestinations();
-        loadSavedTrips();
-        initMap();
         console.log("✅ Wanderlog ready!");
     });
 </script>

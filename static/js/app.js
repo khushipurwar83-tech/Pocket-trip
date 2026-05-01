@@ -40,11 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function initApp() {
-    setupNavigation();
-    // Firebase auth is now handled in the HTML initialization
-}
-
 function setupNavigation() {
     console.log("Navigation setup complete");
     
@@ -74,6 +69,11 @@ function setupNavigation() {
             });
         });
     });
+}
+
+function initApp() {
+    setupNavigation();
+    // Firebase auth is now handled in the HTML initialization
 }
 
 // Global navigate function for backward compatibility

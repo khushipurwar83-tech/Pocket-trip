@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: travel-planner-api
+    env: docker
+    region: frankfurt # Choose appropriate region
+    plan: free
+    dockerCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false # Set manually in Render dashboard to securely load Firebase credentials without committing the JSON
+      - key: SQLITE_DB_PATH
+        value: "sync_queue.db" # Ephemeral file storage on Render, data might be lost on restarts! In production, ideally use an external db.

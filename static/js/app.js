@@ -353,6 +353,26 @@ function renderActiveTripPage() {
     }
 }
 
+function renderSavedDreams() {
+    const savedGrid = document.getElementById('savedGrid');
+    if (!savedGrid) return;
+
+    if (!AppState.savedDreams || AppState.savedDreams.length === 0) {
+        savedGrid.innerHTML = `<div class="body-text" style="text-align:center;padding:24px; width:100%;">No saved dreams yet. Start exploring to pin your favorites!</div>`;
+        return;
+    }
+
+    savedGrid.innerHTML = AppState.savedDreams.map(dest => `
+        <div class="dream-card card" style="background: white;">
+            <div class="dream-image" style="background-image: url('${dest.image}');"></div>
+            <div class="dream-meta">
+                <h4>${dest.name}</h4>
+                <button class="btn btn-outline" onclick="openPlanner('${dest.name}')">Plan Trip</button>
+            </div>
+        </div>
+    `).join('');
+}
+
 window.endCurrentTrip = function() {
     if(confirm('Are you ready to conclude this journey? It will be saved to your past memories.')) {
         AppState.currentTrip.active = false;
